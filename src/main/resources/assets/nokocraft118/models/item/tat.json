@@ -2,5 +2,14 @@
   "parent": "nokocraft118:block/tat",
   "textures": {
     "texture": "minecraft:block/tat"
+  },
+  "display": {
+    "ground": {
+      "translation": [0, 4, 0]
+    },
+    "gui": {
+      "rotation": [15, 155, 0],
+      "translation": [1, 4, 0]
+    }
   }
 }

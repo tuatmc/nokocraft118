@@ -37,24 +37,20 @@ public class StrworkItem extends Item {
     public static final String TAG_EXPLOSION_FADECOLORS = "FadeColors";
     public static final double ROCKET_PLACEMENT_OFFSET = 0.15D;
 
-    public StrworkItem(Item.Properties p_41209_) {
-        super(p_41209_);
+    public StrworkItem(Item.Properties properties) {
+        super(properties);
     }
 
-    /**
-     * Called when this item is used when targetting a Block
-     */
-    public InteractionResult useOn(UseOnContext pContext) {
-        Level level = pContext.getLevel();
+    //useOnでアイテムを手に持って右クリックしたときの動作を指定できる
+    //この部分をコマンドに変えるとコマンド実行アイテムを作れるし，インベントリが出るようにすればバックパックmod風になる
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
         if(!level.isClientSide) {
-            ItemStack itemstack = pContext.getItemInHand();
-            Vec3 vec3 = pContext.getClickLocation();
-            Direction direction = pContext.getClickedFace();
-            //FireworkRocketEntity fireworkrocketentity = new FireworkRocketEntity(level, pContext.getPlayer(), vec3.x + (double)direction.getStepX() * 0.15D, vec3.y + (double)direction.getStepY() * 0.15D, vec3.z + (double)direction.getStepZ() * 0.15D, itemstack);
+            ItemStack itemstack = context.getItemInHand();
+            Vec3 vec3 = context.getClickLocation();
+            Direction direction = context.getClickedFace();
             StrworkEntity strworkentity = new StrworkEntity(level, vec3.x + (double) direction.getStepX() * 0.15D, vec3.y + (double) direction.getStepY() * 0.15D, vec3.z + (double) direction.getStepZ() * 0.15D, itemstack);
             level.addFreshEntity(strworkentity);
-            System.out.println("Entity Summoned!!");
-            System.out.println(strworkentity);
             itemstack.shrink(1);
         }
 
@@ -62,28 +58,26 @@ public class StrworkItem extends Item {
     }
 
 
-    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pHand) {
-        if(pPlayer.isFallFlying()) {
-            ItemStack itemstack = pPlayer.getItemInHand(pHand);
-            if(!pLevel.isClientSide) {
-                StrworkEntity strworkentity = new StrworkEntity(pLevel, itemstack, pPlayer);
-                pLevel.addFreshEntity(strworkentity);
-                if(!pPlayer.getAbilities().instabuild) {
+    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+        if(player.isFallFlying()) {
+            ItemStack itemstack = player.getItemInHand(hand);
+            if(!world.isClientSide) {
+                StrworkEntity strworkentity = new StrworkEntity(world, itemstack, player);
+                world.addFreshEntity(strworkentity);
+                if(!player.getAbilities().instabuild) {
                     itemstack.shrink(1);
                 }
 
-                pPlayer.awardStat(Stats.ITEM_USED.get(this));
+                player.awardStat(Stats.ITEM_USED.get(this));
             }
 
-            return InteractionResultHolder.sidedSuccess(pPlayer.getItemInHand(pHand), pLevel.isClientSide());
+            return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), world.isClientSide());
         } else {
-            return InteractionResultHolder.pass(pPlayer.getItemInHand(pHand));
+            return InteractionResultHolder.pass(player.getItemInHand(hand));
         }
     }
 
-    /**
-     * allows items to add custom lines of information to the mouseover description
-     */
+    //カーソルを合わせたときのコメントを設定できる
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
         CompoundTag compoundtag = pStack.getTagElement("Fireworks");
         if(compoundtag != null) {
@@ -117,26 +111,22 @@ public class StrworkItem extends Item {
     }
 
     public static enum Shape {
-        SMALL_BALL(0, "small_ball"),
-        LARGE_BALL(1, "large_ball"),
-        STAR(2, "star"),
-        CREEPER(3, "creeper"),
-        BURST(4, "burst"),
-        T_STR(5, "t letter"),
-        U_STR(6, "u letter"),
-        A_STR(7, "a letter");
+        //TUAの三種類の花火を追加
+        T_STR(0, "t letter"),
+        U_STR(1, "u letter"),
+        A_STR(2, "a letter");
 
-        private static final StrworkItem.Shape[] BY_ID = Arrays.stream(values()).sorted(Comparator.comparingInt((p_41240_) -> {
-            return p_41240_.id;
-        })).toArray((p_41243_) -> {
-            return new StrworkItem.Shape[p_41243_];
+        private static final StrworkItem.Shape[] BY_ID = Arrays.stream(values()).sorted(Comparator.comparingInt((shape) -> {
+            return shape.id;
+        })).toArray((i) -> {
+            return new StrworkItem.Shape[i];
         });
         private final int id;
         private final String name;
 
-        private Shape(int p_41234_, String p_41235_) {
-            this.id = p_41234_;
-            this.name = p_41235_;
+        private Shape(int id, String name) {
+            this.id = id;
+            this.name = name;
         }
 
         public int getId() {
@@ -147,8 +137,9 @@ public class StrworkItem extends Item {
             return this.name;
         }
 
+        //名前からでも番号からでも花火の種類を選べる
         public static StrworkItem.Shape byId(int pIndex) {
-            return pIndex >= 0 && pIndex < BY_ID.length ? BY_ID[pIndex] : SMALL_BALL;
+            return pIndex >= 0 && pIndex < BY_ID.length ? BY_ID[pIndex] : T_STR;
         }
     }
 }

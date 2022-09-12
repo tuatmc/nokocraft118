@@ -27,13 +27,10 @@ import java.util.Random;
 @OnlyIn(Dist.CLIENT)
 public class StrworkParticle {
 
-
-    private final Minecraft minecraft = Minecraft.getInstance();
-
+    //パーティクルが呼ばれたとき
     public void createStrworks(ClientLevel level, double pX, double pY, double pZ, double pMotionX, double pMotionY, double pMotionZ, @Nullable CompoundTag pCompound) {
         Minecraft.getInstance().particleEngine.add(new Starter(level, pX, pY, pZ, pMotionX, pMotionY, pMotionZ, Minecraft.getInstance().particleEngine, pCompound));
     }
-
 
     @OnlyIn(Dist.CLIENT)
     public static class FlashProvider implements ParticleProvider<SimpleParticleType> {
@@ -194,7 +191,7 @@ public class StrworkParticle {
                 } else {
                     for(int i = 0; i < this.explosions.size(); ++i) {
                         CompoundTag compoundtag = this.explosions.getCompound(i);
-                        if(StrworkItem.Shape.byId(compoundtag.getByte("Type")) == StrworkItem.Shape.LARGE_BALL) {
+                        if(StrworkItem.Shape.byId(compoundtag.getByte("Type")) == StrworkItem.Shape.T_STR) {
                             flag1 = true;
                             break;
                         }
@@ -220,6 +217,8 @@ public class StrworkParticle {
                 String color = compoundtag1.getString("Color");
                 isRotate = compoundtag1.getBoolean("isRotate");
                 size = compoundtag1.getDouble("Size");
+                //colorタグで色を付けられる，デフォルトは赤
+                //カラーコードを入力してその色にすることもできるけど今回は不要なので実装していない
                 int cint = DyeColor.RED.getFireworkColor();
                 switch(color) {
                     case "BLUE":
@@ -234,27 +233,12 @@ public class StrworkParticle {
                     case "WHITE":
                         cint = DyeColor.WHITE.getFireworkColor();
                         break;
-
                 }
 
 
+                //ここが花火の形状を作ってる部分
+                //結構原始的な方法で形状を作ってる
                 switch(fireworkrocketitem$shape) {
-                    case SMALL_BALL:
-                    default:
-                        this.createParticleBall(0.25D, 2, new int[]{cint}, new int[]{cint}, flag4, flag2);
-                        break;
-                    case CREEPER:
-                        this.createParticleBall(0.5D, 4, new int[]{cint}, new int[]{cint}, flag4, flag2);
-                        break;
-                    case STAR:
-                        this.createParticleShape(0.5D, new double[][]{{0.0D, 1.0D}, {0.3455D, 0.309D}, {0.9511D, 0.309D}, {0.3795918367346939D, -0.12653061224489795D}, {0.6122448979591837D, -0.8040816326530612D}, {0.0D, -0.35918367346938773D}}, new int[]{cint}, new int[]{cint}, flag4, flag2, false);
-                        break;
-                    case LARGE_BALL:
-                        this.createParticleShape(0.5D, new double[][]{{0.0D, 0.2D}, {0.2D, 0.2D}, {0.2D, 0.6D}, {0.6D, 0.6D}, {0.6D, 0.2D}, {0.2D, 0.2D}, {0.2D, 0.0D}, {0.4D, 0.0D}, {0.4D, -0.6D}, {0.2D, -0.6D}, {0.2D, -0.4D}, {0.0D, -0.4D}}, new int[]{cint}, new int[]{cint}, flag4, flag2, true);
-                        break;
-                    case BURST:
-                        this.createParticleBurst(new int[]{cint}, new int[]{cint}, flag4, flag2);
-                        break;
                     case T_STR:
                         this.createParticleShape(0.5D, new double[][]{{0.0D, 1.2D}, {1.2D, 1.2D}, {1.2D, 0.6D}, {0.3D, 0.6D}, {0.3D, -1.2D}, {0.0D, -1.2D}}, new int[]{cint}, new int[]{cint}, flag4, flag2, true);
                         break;
@@ -291,51 +275,21 @@ public class StrworkParticle {
             return minecraft.gameRenderer.getMainCamera().getPosition().distanceToSqr(this.x, this.y, this.z) >= 256.0D;
         }
 
-        /**
-         * Creates a single particle.
-         */
+
+        //一個パーティクルをポンと呼ぶだけ
         private void createParticle(double pX, double pY, double pZ, double pMotionX, double pMotionY, double pMotionZ, int[] pSparkColors, int[] pSparkColorFades, boolean pHasTrail, boolean pHasTwinkle) {
 
             StrworkParticle.SparkParticle fireworkparticles$sparkparticle = (SparkParticle) this.engine.createParticle(TuatParticleTypes.SPARK.get(), pX, pY, pZ, pMotionX, pMotionY, pMotionZ);
             fireworkparticles$sparkparticle.setTrail(pHasTrail);
             fireworkparticles$sparkparticle.setFlicker(pHasTwinkle);
-            //fireworkparticles$sparkparticle.setAlpha(0.99F);
             int i = this.random.nextInt(pSparkColors.length);
             fireworkparticles$sparkparticle.setColor(pSparkColors[i]);
             if(pSparkColorFades.length > 0) {
                 fireworkparticles$sparkparticle.setFadeColor(Util.getRandom(pSparkColorFades, this.random));
             }
-
         }
 
-        /**
-         * Creates a small ball or large ball type explosion effect.
-         */
-        private void createParticleBall(double pSpeed, int pSize, int[] pColours, int[] pFadeColours, boolean pTrail, boolean pTwinkle) {
-            double d0 = this.x;
-            double d1 = this.y;
-            double d2 = this.z;
 
-            for(int i = -pSize; i <= pSize; ++i) {
-                for(int j = -pSize; j <= pSize; ++j) {
-                    for(int k = -pSize; k <= pSize; ++k) {
-                        double d3 = (double) j + (this.random.nextDouble() - this.random.nextDouble()) * 0.5D;
-                        double d4 = (double) i + (this.random.nextDouble() - this.random.nextDouble()) * 0.5D;
-                        double d5 = (double) k + (this.random.nextDouble() - this.random.nextDouble()) * 0.5D;
-                        double d6 = Math.sqrt(d3 * d3 + d4 * d4 + d5 * d5) / pSpeed + this.random.nextGaussian() * 0.05D;
-                        this.createParticle(d0, d1, d2, d3 / d6, d4 / d6, d5 / d6, pColours, pFadeColours, pTrail, pTwinkle);
-                        if(i != -pSize && i != pSize && j != -pSize && j != pSize) {
-                            k += pSize * 2 - 1;
-                        }
-                    }
-                }
-            }
-
-        }
-
-        /**
-         * Creates a creeper-shaped or star-shaped explosion.
-         */
         private void createParticleShape(double pSpeed, double[][] pShape, int[] pColours, int[] pFadeColours, boolean pTrail, boolean pTwinkle, boolean pCreeper) {
 
             double x0 = size * pShape[0][0];
@@ -375,25 +329,6 @@ public class StrworkParticle {
                     y0_copy = ylist;
                 }
             }
-
         }
-
-        /**
-         * Creates a burst type explosion effect.
-         */
-        private void createParticleBurst(int[] pColours, int[] pFadeColours, boolean pTrail, boolean pTwinkle) {
-            double d0 = this.random.nextGaussian() * 0.05D;
-            double d1 = this.random.nextGaussian() * 0.05D;
-
-            for(int i = 0; i < 70; ++i) {
-                double d2 = this.xd * 0.5D + this.random.nextGaussian() * 0.15D + d0;
-                double d3 = this.zd * 0.5D + this.random.nextGaussian() * 0.15D + d1;
-                double d4 = this.yd * 0.5D + this.random.nextDouble() * 0.5D;
-                this.createParticle(this.x, this.y, this.z, d2, d4, d3, pColours, pFadeColours, pTrail, pTwinkle);
-            }
-
-        }
-
-
     }
 }
