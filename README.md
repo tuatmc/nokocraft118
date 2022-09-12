@@ -6,7 +6,7 @@
 
 つかいかた  
 IntelliJの画面右上，「ファイル」より「新規」「バージョン管理からプロジェクト」を開く  
-URLを入れる画面が出てくるのでこのリポジトリのURL(https://github.com/tuatmc/nokocraft118)を入力  
+URLを入れる画面が出てくるのでこのリポジトリの[URL](https://github.com/tuatmc/nokocraft118)を入力  
 出てくるもんにyesしまくればローカル環境にコピー完了  
   
 しばらく待てばforgeデバッグ環境が構築されると思うので起動してみる  
