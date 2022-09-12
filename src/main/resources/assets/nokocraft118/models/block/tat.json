@@ -1,0 +1,5 @@
+{
+  "loader": "forge:obj",
+  "model": "nokocraft118:models/block/tat.obj",
+  "flip-v": true
+}

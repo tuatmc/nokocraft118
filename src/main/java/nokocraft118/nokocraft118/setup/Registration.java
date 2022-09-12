@@ -38,7 +38,7 @@ public class Registration {
     }
 
     //ブロックの持つ設定，ここを書き換えると硬さや歩いたとき・破壊したときの音，明るさ，ツール必須などの設定を行える．
-    public static final BlockBehaviour.Properties BLOCK_PROPERTIES = BlockBehaviour.Properties.of(Material.STONE).strength(2f).requiresCorrectToolForDrops();
+    public static final BlockBehaviour.Properties BLOCK_PROPERTIES = BlockBehaviour.Properties.of(Material.STONE).strength(2f).requiresCorrectToolForDrops().noOcclusion();
     //アイテムの持つ設定，ここを書き換えることで食べられるようにしたりできる
     public static final Item.Properties ITEM_PROPERTIES = new Item.Properties().tab(ModSetup.ITEM_GROUP);
 

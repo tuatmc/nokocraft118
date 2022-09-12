@@ -1,0 +1,6 @@
+{
+  "parent": "nokocraft118:block/tat",
+  "textures": {
+    "texture": "minecraft:block/tat"
+  }
+}
